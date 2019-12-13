@@ -61,3 +61,6 @@
 
   7.克隆 git clone https://github.XXXX
    克隆后，只能看见主分支master，要切换到别的分支后才能看见别的分支 git checkout -b my origin/my 根据远程my分支创建本地my分支 
+
+# 11 做路由的首页、搜索、订单、我的的静态页面
+
