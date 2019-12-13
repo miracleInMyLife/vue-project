@@ -9,7 +9,7 @@ import Profile from '../pages/Profile/Profile.vue'
 Vue.use(VueRouter)
 
 export default new VueRouter({
-  mode:history,
+  mode:'history',
 
   // 项目中所有的前端路由
   routes: [
