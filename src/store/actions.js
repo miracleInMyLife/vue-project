@@ -13,7 +13,7 @@ export default {
   },
 
   // 请求分类列表
-  async getCategorys({commit}){
+  async getCategorys({commit},callback){  // 解决swiper无法正常显示的解决方法2：在callback中创建Swiper实例
     let result = await reqCategorys()
     if (result.code === 0) {
       const {data} = result
@@ -22,9 +22,12 @@ export default {
         return {
           title:item.title,
           imgUrl:item.image_url, 
+          link:item.link
         }
       })
-      commit(CATEGORYS,categorys)
+      commit(CATEGORYS,categorys) // 同步改变状态，状态改变后就会触发界面更新
+
+      typeof callback === 'function' && callback() // 在改变状态后触发回调，swiper实例在回调中
     }
   },
   // 请求商家
@@ -33,27 +36,27 @@ export default {
     let result = await reqShops(longitude,latitude)
     if (result.code === 0) {
       const {data} = result
-      const shops = data.map((item)=>{
-        return {
-          id:item.id,
-          name:item.name,
-          address:item.address,
-          location:item.location,
-          imgUrl:item.image_url, 
-          phone:item.phone,
-          category:item.category,
-          supports:item.supports,
-          orderNum : item.recent_order_num,
-          count:item.rating_count,
-          fee:item.piecewise_agent_fee.tips,
-          time:item.opening_hours,
-          imgUrl:item.image_path,
-          minPrice:item.float_minimum_order_amoun,
-          carryFee:item.float_delivery_fee,
-          leadTime:item.order_lead_time,
-        }
-      })
-      commit(SHOPS,shops)
+      // const shops = data.map((item)=>{  加工数组
+      //   return {
+      //     id:item.id,
+      //     name:item.name,
+      //     address:item.address,
+      //     location:item.location,
+      //     imgUrl:item.image_url, 
+      //     phone:item.phone,
+      //     category:item.category,
+      //     supports:item.supports,
+      //     orderNum : item.recent_order_num,
+      //     count:item.rating_count,
+      //     fee:item.piecewise_agent_fee.tips,
+      //     time:item.opening_hours,
+      //     imgUrl:item.image_path,
+      //     minPrice:item.float_minimum_order_amoun,
+      //     carryFee:item.float_delivery_fee,
+      //     leadTime:item.order_lead_time,
+      //   }
+      // })
+      commit(SHOPS,data)
     }
   },
 

@@ -16,7 +16,7 @@ instance.interceptors.request.use(
       config.data = qs.stringify(config.data)
     }
     console.log(store.state)
-  return config
+  return config  // 请求拦截器只是在发送请求前对请求信息进行过滤和更改，要将请求信息返回，因为还要继续发送请求的
 })
 
 
