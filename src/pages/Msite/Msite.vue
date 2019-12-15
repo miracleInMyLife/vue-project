@@ -52,11 +52,13 @@
                 <section class="shop_rating_order">
                   <section class="shop_rating_order_left">
                     <div class="star star-24">
-                      <span class="star-item on"></span>
+                      <!-- <span class="star-item on"></span>
                       <span class="star-item on"></span>
                       <span class="star-item on"></span>
                       <span class="star-item half"></span>
-                      <span class="star-item off"></span>
+                      <span class="star-item off"></span> -->
+                      <!-- 将对应的评分传给score -->
+                      <Score :rate="shop.rating"></Score>
                     </div>
                     <div class="rating_section">
                       {{shop.rating}}
@@ -79,7 +81,6 @@
               </div>
             </a>
           </li>
-          
         </ul>
         <ul v-else>
           <li>
@@ -105,6 +106,7 @@ import Swiper from 'swiper'
 import 'swiper/css/swiper.css'  //引入样式，类名才能起作用
 import { mapState } from 'vuex'
 import chunk from 'lodash/chunk' // chunk函数将一个一维数组变为二维数组
+
 export default {
   computed: {
     ...mapState(['address','categorys','shops']),
@@ -115,6 +117,7 @@ export default {
   },
   async mounted() {
     this.$store.dispatch('getAddress')
+    this.$store.dispatch('getShops')
     await this.$store.dispatch('getCategorys')   // 解决swiper无法正常显示的解决方法3：利用diapatch的返回的promise，用async和await等待数据和页面更新结束
     new Swiper('.swiper-container',{   // 上面一步，因为有await，页面已经更新，
       //direction : '', // 默认是水平轮播,所以不用设置
@@ -134,7 +137,7 @@ export default {
     //     })
     //   })
     // })
-    this.$store.dispatch('getShops')
+    
     // 单纯的在mounted中创建swiper实例，在动态产生数据时，swiper实例会失效
     // new Swiper('.swiper-container',{
     //   //direction : '', // 默认是水平轮播,所以不用设置

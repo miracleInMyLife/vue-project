@@ -14,10 +14,10 @@
             <section class="login_message">
               <input type="tel" v-model="phone" maxlength="11" placeholder="手机号" name="smsMobile" v-validate="'required|mobile'">
               <span style="color: red;" v-show="errors.has('smsMobile')">{{ errors.first('smsMobile') }}</span>
-              <button :disabled="phone.length === 11" :class="phone.length === 11 ? 'get_verification get_code':'get_verification'" @click="getCode">获取验证码</button>
+              <button :disabled="phone.length !== 11" :class="phone.length === 11 ? 'get_verification get_code':'get_verification'" @click.prevent="getCode">获取验证码 {{countDown}}</button>
             </section>
             <section class="login_verification">
-              <input type="tel" maxlength="8" placeholder="验证码" name="smsCode"  v-validate="'required|code'">
+              <input type="tel"  v-model="smsCode" maxlength="8" placeholder="验证码" name="smsCode"  v-validate="'required|smsCode'">
               <span style="color: red;" v-show="errors.has('smsCode')">{{ errors.first('smsCode') }}</span>
             </section>
             <section class="login_hint">
@@ -28,11 +28,11 @@
           <div :class="{on:!isShowSms}">
             <section>
               <section class="login_message">
-                <input type="tel" maxlength="11" placeholder="手机/邮箱/用户名" name="pwdMobile" v-validate="'required|mobile'">
+                <input type="tel" v-model="pwdPhone" maxlength="11" placeholder="用户名" name="username" v-validate="'required|username'">
                 <span style="color: red;" v-show="errors.has('pwdMobile')">{{ errors.first('pwdMobile') }}</span>
               </section>
               <section class="login_verification">
-                <input :type="isShowPwd ? 'text' :'password'" maxlength="8" placeholder="密码" name="pwd" v-validate="'required|pwd'">
+                <input :type="isShowPwd ? 'text' :'password'"  v-model="pwd" maxlength="8" placeholder="密码" name="pwd" v-validate="'required|pwd'">
                 <span style="color: red;" v-show="errors.has('pwd')">{{ errors.first('pwd') }}</span>
 
                 <div :class="isShowPwd?'switch_button on':'switch_button off'" @click="isShowPwd = !isShowPwd">
@@ -41,13 +41,13 @@
                 </div>
               </section>
               <section class="login_message">
-                <input type="text" maxlength="11" placeholder="验证码" name="pwdCode" v-validate="'required|code'">
+                <input type="text" v-model="pwdCode" maxlength="11" placeholder="验证码" name="pwdCode" v-validate="'required|pwdCode'">
                 <span style="color: red;" v-show="errors.has('pwdCode')">{{ errors.first('pwdCode') }}</span>
-                <img class="get_verification" src="./images/captcha.svg" alt="captcha">
+                <img class="get_verification" src="./images/captcha.svg" alt="captcha" @click="codeUpdate">
               </section>
             </section>
           </div>
-          <button class="login_submit">登录</button>
+          <button class="login_submit" @click.prevent="login">登录</button>
         </form>
         <a href="javascript:;" class="about_us">关于我们</a>
       </div>
@@ -62,13 +62,29 @@
 import Vue from 'vue'
 import VeeValidate from 'vee-validate'  //处理表单验证的问题
 import zh_CN from 'vee-validate/dist/locale/zh_CN' // 提示信息本地化
+import { reqSmsCode,reqImgCode,reqSmsLogin,reqPwdLogin } from '../../api/index.js'
 Vue.use(VeeValidate)
+
 // 指定手机号的验证规则
 VeeValidate.Validator.extend('mobile', {
   validate: value => {
     return /^1\d{10}$/.test(value)
   },
   getMessage: field => field + '必须是11位手机号码'
+})
+// 指定短信验证码的验证规则
+VeeValidate.Validator.extend('smsCode', {
+  validate: value => {  
+    return /^\d{6}$/.test(value)
+  },
+  getMessage: field => field + '必须为4位合法字符'
+})
+// 指定用户名的验证规则
+VeeValidate.Validator.extend('username', {
+  validate: value => {
+    return /^1\d{10}$/.test(value)
+  },
+  getMessage: field => field + '不合法'
 })
 // 指定邮件的验证规则
 VeeValidate.Validator.extend('email', {
@@ -77,12 +93,13 @@ VeeValidate.Validator.extend('email', {
   },
   getMessage: field => field + '不合法'
 })
-// 指定验证码的验证规则
-VeeValidate.Validator.extend('code', {
+
+// 指定密码登录图片验证码的验证规则
+VeeValidate.Validator.extend('pwdCode', {
   validate: value => {  
-    return /^\d{4}$/.test(value)
+    return /^\w{4}$/.test(value)
   },
-  getMessage: field => field + '必须为4位'
+  getMessage: field => field + '必须为4位合法字符'
 })
 // 指定密码的验证规则
 VeeValidate.Validator.extend('pwd', {
@@ -109,17 +126,71 @@ export default {
   data() {
     return {
       phone:'', // 短信登录界面的手机号输入框的数据绑定
+      smsCode:'',
+      pwdPhone:'',
+      pwd:'',
+      pwdCode:'',
       isShowSms:true, //短信登录和密码登录切换
       isShowPwd:true, //控制密码登录界面的密码框是否可见
-      
+      imgCodeUrl:'',  // 存放图片验证码的地址
+      countDown:'' , // 倒计时的时间
     }
   },
   methods: {
-    getCode(){
-      this.
-    }
-  },
+    async getCode(){
+      // 点击获取验证码 就表示要开始倒计时
+      let seconds = 10
+      this.countDown = seconds + 's'
+      this.timer = setInterval(() => {
+        seconds--
+        this.countDown = seconds + 's'
+        if (seconds < 0 ) {
+          clearInterval(this.timer)
+          this.countDown =''
+        }
+      }, 1000);
 
+      //发送请求获取短信验证码
+      const result = await reqSmsCode(this.phone)
+      console.log(result)
+      // 此处执行获取到验证码之后的操作
+
+    },
+    //当点击图片时，发送请求获取新的验证码图片
+    async codeUpdate(){
+      const result = await reqImgCode()
+      //console.log(result) //获取到图片验证码的地址
+      this.imgCodeUrl = result
+      console.log(this.imgCodeUrl)
+    },
+    async login(){
+      if (this.isShowSms) {
+        const success = await this.$validator.validateAll(['smsMobile','smsCode'])  // success结果是布尔值
+        if (success) {
+           //若是校验成功，则登录到首页
+           //则发请求 短信登录
+          // const result = await reqSmsLogin(this.phone,this.smsCode)
+          // console.log(result)
+          this.$router.push('/msite')
+        }
+      }else {
+        const success = await this.$validator.validateAll(['username','pwdCode','pwd']) 
+        if (success) {
+          //若是校验成功，则登录到首页(后面还要校验数据库的信息，此时就先这样写)
+          //则发请求 短信登录
+          // const result = await reqPwdLogin(this.username,this.pwd,this.pwdCode)
+          // console.log(result)
+          // this.$router.push('/msite')
+        }
+      }
+    },
+    
+  },
+  // watch: {
+  //   countDown(value){
+  //     this.countDown = value
+  //   }
+  // },
 }
 </script>
 

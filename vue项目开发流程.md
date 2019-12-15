@@ -241,7 +241,7 @@
 ## 10.5 语言切换
     通过添加动态类名来实现效果
 
-## 表单验证 --- 借用vee-validate
+## 表单验证 --- 借用vee-validate,返回的是promise对象
   下载 npm i vee-validate
   引入 import VeeValidate from 'vee-validate'
 

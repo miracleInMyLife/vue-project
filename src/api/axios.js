@@ -2,6 +2,7 @@
 import axios from 'axios'
 import qs from 'qs'
 import store from '../store/store'
+import { Indicator } from 'mint-ui'
 
 const instance = axios.create({
   baseURL:'/api',
@@ -9,8 +10,8 @@ const instance = axios.create({
 });
 
 // 请求拦截器
-instance.interceptors.request.use(
-  config => {
+instance.interceptors.request.use(config => {
+    Indicator.open() // 开启loading效果
     console.log(config) // config里面是所有请求的信息：方式、参数、地址等等
     if (config.data instanceof Object) {
       config.data = qs.stringify(config.data)
@@ -23,10 +24,12 @@ instance.interceptors.request.use(
 // 响应拦截器
 instance.interceptors.response.use(
   response => {
-  console.log(response)
-  return response.data
+    Indicator.close() // 关闭loading效果
+    console.log(response)
+    return response.data
   },
   error => {
+    Indicator.close() // 关闭loading效果
     alert('请求错误' + error.message)
     return new Promise(()=>{})
   } 

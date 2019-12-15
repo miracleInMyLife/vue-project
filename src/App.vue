@@ -10,9 +10,12 @@
  import Vue from 'vue'
 import FooterNav from './components/footer/FooterNav.vue'
 import Header from './components/header/Header.vue' // 注册全局组件
+import Score from './components/score/Score' // 注册全局组件
 
 // 注册全局的组件，因为header组件在四个页面中都用到了
 Vue.component('Header',Header)
+Vue.component('Score',Score)
+
 
 export default {
   name: 'app',
