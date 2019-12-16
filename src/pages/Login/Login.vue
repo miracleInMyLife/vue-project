@@ -14,7 +14,7 @@
             <section class="login_message">
               <input type="tel" v-model="phone" maxlength="11" placeholder="手机号" name="smsMobile" v-validate="'required|mobile'">
               <span style="color: red;" v-show="errors.has('smsMobile')">{{ errors.first('smsMobile') }}</span>
-              <button :disabled="phone.length !== 11" :class="phone.length === 11 ? 'get_verification get_code':'get_verification'" @click.prevent="getCode">获取验证码 {{countDown}}</button>
+              <button :disabled="phone.length !== 11" :class="phone.length === 11 ? 'get_verification get_code':'get_verification'" @click.prevent="getCode"> {{countDown > 0 ? `验证码已发送(${countDown}s)` : '发送验证码'}}</button>
             </section>
             <section class="login_verification">
               <input type="tel"  v-model="smsCode" maxlength="8" placeholder="验证码" name="smsCode"  v-validate="'required|smsCode'">
@@ -29,7 +29,7 @@
             <section>
               <section class="login_message">
                 <input type="tel" v-model="pwdPhone" maxlength="11" placeholder="用户名" name="username" v-validate="'required|username'">
-                <span style="color: red;" v-show="errors.has('pwdMobile')">{{ errors.first('pwdMobile') }}</span>
+                <span style="color: red;" v-show="errors.has('username')">{{ errors.first('username') }}</span>
               </section>
               <section class="login_verification">
                 <input :type="isShowPwd ? 'text' :'password'"  v-model="pwd" maxlength="8" placeholder="密码" name="pwd" v-validate="'required|pwd'">
@@ -43,7 +43,7 @@
               <section class="login_message">
                 <input type="text" v-model="pwdCode" maxlength="11" placeholder="验证码" name="pwdCode" v-validate="'required|pwdCode'">
                 <span style="color: red;" v-show="errors.has('pwdCode')">{{ errors.first('pwdCode') }}</span>
-                <img class="get_verification" src="./images/captcha.svg" alt="captcha" @click="codeUpdate">
+                <img class="get_verification" src="http://localhost:4000/captcha" alt="captcha" @click="codeUpdate" ref="imgCode">
               </section>
             </section>
           </div>
@@ -59,68 +59,68 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import VeeValidate from 'vee-validate'  //处理表单验证的问题
-import zh_CN from 'vee-validate/dist/locale/zh_CN' // 提示信息本地化
+// import Vue from 'vue'
+// import VeeValidate from 'vee-validate'  //处理表单验证的问题
+// import zh_CN from 'vee-validate/dist/locale/zh_CN' // 提示信息本地化
 import { reqSmsCode,reqImgCode,reqSmsLogin,reqPwdLogin } from '../../api/index.js'
-Vue.use(VeeValidate)
+// Vue.use(VeeValidate)
 
 // 指定手机号的验证规则
-VeeValidate.Validator.extend('mobile', {
-  validate: value => {
-    return /^1\d{10}$/.test(value)
-  },
-  getMessage: field => field + '必须是11位手机号码'
-})
-// 指定短信验证码的验证规则
-VeeValidate.Validator.extend('smsCode', {
-  validate: value => {  
-    return /^\d{6}$/.test(value)
-  },
-  getMessage: field => field + '必须为4位合法字符'
-})
-// 指定用户名的验证规则
-VeeValidate.Validator.extend('username', {
-  validate: value => {
-    return /^1\d{10}$/.test(value)
-  },
-  getMessage: field => field + '不合法'
-})
-// 指定邮件的验证规则
-VeeValidate.Validator.extend('email', {
-  validate: value => {
-    return /^\w{5,20}@(qq|163|126|sina)\.(com|cn)$/.test(value)
-  },
-  getMessage: field => field + '不合法'
-})
+// VeeValidate.Validator.extend('mobile', {
+//   validate: value => {
+//     return /^1\d{10}$/.test(value)
+//   },
+//   getMessage: field => field + '必须是11位手机号码'
+// })
+// // 指定短信验证码的验证规则
+// VeeValidate.Validator.extend('smsCode', {
+//   validate: value => {  
+//     return /^\d{6}$/.test(value)
+//   },
+//   getMessage: field => field + '必须为4位合法字符'
+// })
+// // 指定用户名的验证规则
+// VeeValidate.Validator.extend('username', {
+//   validate: value => {
+//     return /^1\d{10}$/.test(value)
+//   },
+//   getMessage: field => field + '不合法'
+// })
+// // 指定邮件的验证规则
+// VeeValidate.Validator.extend('email', {
+//   validate: value => {
+//     return /^\w{5,20}@(qq|163|126|sina)\.(com|cn)$/.test(value)
+//   },
+//   getMessage: field => field + '不合法'
+// })
 
-// 指定密码登录图片验证码的验证规则
-VeeValidate.Validator.extend('pwdCode', {
-  validate: value => {  
-    return /^\w{4}$/.test(value)
-  },
-  getMessage: field => field + '必须为4位合法字符'
-})
-// 指定密码的验证规则
-VeeValidate.Validator.extend('pwd', {
-  validate: value => {
-    return /^\w{2,8}$/.test(value)
-  },
-  getMessage: field => field + '必须大于2位小于8位'
-})
+// // 指定密码登录图片验证码的验证规则
+// VeeValidate.Validator.extend('pwdCode', {
+//   validate: value => {  
+//     return /^\w{4}$/.test(value)
+//   },
+//   getMessage: field => field + '必须为4位合法字符'
+// })
+// // 指定密码的验证规则
+// VeeValidate.Validator.extend('pwd', {
+//   validate: value => {
+//     return /^\w{2,8}$/.test(value)
+//   },
+//   getMessage: field => field + '必须大于2位小于8位'
+// })
 
-// 提示信息本地化
-VeeValidate.Validator.localize('zh_CN', {
-  messages: zh_CN.messages,
-  attributes: {
-    smsMobile: '手机号',
-    smsCode:'验证码',
-    pwdMobile:'手机号',
-    pwdCode:'验证码',
-    email: '邮箱',
-    pwd:'密码',
-  }
-})
+// // 提示信息本地化
+// VeeValidate.Validator.localize('zh_CN', {
+//   messages: zh_CN.messages,
+//   attributes: {
+//     smsMobile: '手机号',
+//     smsCode:'验证码',
+//     pwdMobile:'手机号',
+//     pwdCode:'验证码',
+//     email: '邮箱',
+//     pwd:'密码',
+//   }
+// })
 
 export default {
   data() {
@@ -132,36 +132,43 @@ export default {
       pwdCode:'',
       isShowSms:true, //短信登录和密码登录切换
       isShowPwd:true, //控制密码登录界面的密码框是否可见
-      imgCodeUrl:'',  // 存放图片验证码的地址
-      countDown:'' , // 倒计时的时间
+      // imgCodeUrl:'',  // 存放图片验证码的地址
+      countDown:0 , // 倒计时的时间
     }
   },
   methods: {
     async getCode(){
       // 点击获取验证码 就表示要开始倒计时
-      let seconds = 10
-      this.countDown = seconds + 's'
+      this.countDown = 10
       this.timer = setInterval(() => {
-        seconds--
-        this.countDown = seconds + 's'
-        if (seconds < 0 ) {
+        this.countDown--
+        if (this.countDown <= 0 ) {
           clearInterval(this.timer)
-          this.countDown =''
         }
       }, 1000);
 
       //发送请求获取短信验证码
       const result = await reqSmsCode(this.phone)
+      if (result.code === 0) {   // 发送成功
+        //提示成功
+      }else {
+        //提示失败
+      }
       console.log(result)
       // 此处执行获取到验证码之后的操作
 
     },
     //当点击图片时，发送请求获取新的验证码图片
     async codeUpdate(){
-      const result = await reqImgCode()
-      //console.log(result) //获取到图片验证码的地址
-      this.imgCodeUrl = result
-      console.log(this.imgCodeUrl)
+      // 无需发请求了，直接修改src值即可
+      // const result = await reqImgCode()
+      if (this.id) {
+        clearTimeout(this.id)
+      }
+      this.id = setTimeout(() => {
+        this.$refs.imgCode.src = `/api/captcha?t=${Date.now()}`
+      }, 500);
+    
     },
     async login(){
       if (this.isShowSms) {
@@ -180,7 +187,7 @@ export default {
           //则发请求 短信登录
           // const result = await reqPwdLogin(this.username,this.pwd,this.pwdCode)
           // console.log(result)
-          // this.$router.push('/msite')
+          // this.$router.push('/profile')
         }
       }
     },

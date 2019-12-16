@@ -3,8 +3,10 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router/index'
-import flexible from 'lib-flexible'
+import 'lib-flexible'
 import store from './store/store'
+import './validate'
+
 Vue.config.productionTip = false
 
 new Vue({
@@ -13,6 +15,6 @@ new Vue({
     App,
   },
   template:'<App/>',  // 用模板语法相对于render来说文件大小会大一些
-  router,
-  store,
+  router, //所有路由组件对象
+  store,  // 所有组件对象
 }).$mount('#app')

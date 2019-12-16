@@ -162,7 +162,7 @@
 
 # 3 用mapState、mapActions。。。等4个函数去将store中对应的方法映射出来
 
-# 4 在首页去发送getShops请求时，会报错，401 ---表示权限不够，后台要求携带token验证
+# 4 在首页发送getShops请求时，会报错，401 ---表示权限不够，后台要求携带token验证
   现在暂未处理这个问题，还没添加token，先去服务器去更改暂时用一下
             
 # 5 从后台请求回来的分类和商家列表数据，被保存到state中去
@@ -204,7 +204,7 @@
 
     2、callback + vm.$nextTick()
       利用
-    3、利用dispatch，dispatch返回值是promise，且该promise在数据更新且界面更新之后才成功，所以可以使用async和await等待dispatch返回后才创建swiper实例 
+    3、dispatch返回值是promise，且该promise在数据更新且界面更新之后才成功，所以可以使用async和await等待dispatch返回后才创建swiper实例 
       async mounted (){
         ...其他的请求放在前面...
         await this.$store.dispatch('getCategorys')
@@ -234,6 +234,8 @@
     输入的手机号要做数据绑定 --- 通过计算手机号属性用正则匹配后反正一个布尔值--- 根据布尔值控制验证和发送验证码的按钮是否可用
 
 ## 10.3 发送验证码的倒计时效果
+  在可以点击发送验证码时开始倒计时
+  注意问题：当不停的点击发送验证码按钮会出现连续开定时器的，所以在输入框的disable属性要设置为在倒计时时也不能点击
 
 ## 10.4 密码登录界面的密码可见性的切换
     通过当前页面的状态的布尔值去控制input框的type值(text/password)
@@ -245,6 +247,146 @@
   下载 npm i vee-validate
   引入 import VeeValidate from 'vee-validate'
 
+## 10.6 前后台交互
+### 10.6.1 一次性图形验证码
+  一请求就直接回来一张图，data值就是图片的地址svg
+  所以此时不需要发ajax请求，直接把src值设置为请求的地址，
+    1) 利用代理服务器转发请求到4000的接口
+      src="/api/captcha"  
+    2) 当前请求的是一个http的请求，不是ajax请求，不存在跨域问题
+      src="http://localhost:4000/captcha"
+  
+  当点击图片时，要切换图片
+    要切换就要重新指定新的src的值
+    用ref标记输入框,修改src值
+    this.$refs.src = `http://localhost:4000/captcha?t=${Date.now()}`
+    后面加query参数t是为了使src的值时刻都是新的，浏览器会发生请求
+    中午待解决：用防抖解决点击过快的问题，让500ms只可以点击一次,用定时器，每次在500ms内点击，都会取消上一次的定时器
+
+### 10.6.2 获取短信验证码（测试）
+  用到容联云通讯---注册账号---添加测试号码---要将服务器后台的util里的信息改成自己的信息后---重新运行服务器---向测试号码发送验证码---
+  发送请求的接口，可以使用对象写法
+      export const reqSmsCode = (phone) => axios.get({
+        url:'/sendcode',
+        params:{
+          phone
+        }
+      }
+  在引入时，除了通过直接引入方法之外，还可以将整个请求文件夹中所有文件包装成暴露出去，用ES6的通用写法：
+    在入口文件引入：import * as API from './api/index'
+    在入口文件中注册后，所有的组件对象this身上都有$API这个对象，并且这个对象里面有发送请求的所有的方法
+
+
+  在短信发送失败后(得到的code为1),要停止倒计时：将计时的时间改成0，前面检测状态改变的会自动停止定时器
+    this.countDown = 0
+
+### 10.6.3 短信登录
+  1 定义发请求的方法：
+    export const reqSmsLogin = (phone,code) => axios.post('/login_sms',{phone,code})
+  2 再表单认证成功，发送登录请求，code为0表示成功，code为1表示失败
+    2.1 若失败，
+      
+    2.2 若成功，得到user的信息（包含token）
+      
+
+
+### 10.6.4 密码登录
+  1 定义发请求的方法：
+    export const reqPwdLogin = (name,pwd,captcha ) => axios.post('/login_pwd',{name,pwd,captcha})
+  2 再表单认证成功，发送登录请求，code为0表示成功，code为1表示失败
+    2.1 若失败，
+      2.1.1 提示失败信息,
+      2.1.2 并且刷新图片验证码 --- 指定src的值--- 直接调用之前定义好的 点击图片更新图片验证码的方法即可
+      2.1.3 还要清空输入框
+    2.2 若成功，得到user的信息（包含token）
+      将user和user中的token保存到vuex的state中，也要保存到localStorage中
+        在个人中心的页面，头像旁边登录信息的显示要从vuex中取，在state中初始化token值为本地存储的值-token:localStorage.getItems('token')
+        存储到localStorage,是为了在刷新时也可以有信息
+      跳转到个人中心 this.$router.replace('/profile')
+  
+### 10.6.4 自动登录
+  通过请求拦截器设置请求头，携带token数据
+    import './src/store'
+    const token = store.state().token
+    if(token){
+      config.headers['Autonozation']= token
+    }
+  实现自动登录：在App组件挂载后就要发请求登录---在没有user，有token的情况下才发自动登录的请求
+    if(state.token && !state.user._id){
+      const result = await reqAutoLogin()
+      if(result === 0){ 请求成功
+        const user = result.data  没有token
+        commit() 改变状态
+      }
+    }
+  
+### token问题:
+  在第一次登录时，服务器对用户名和密码查询，如果user存在，服务器校验成功，根据user的id值生成token，通过响应返回token（token中有两个重要的信息：一个是用户的id，一个是token时效），将token保存到localStorage中，也要存到state中（为了取值更快）
+  再次请求登录时，要携带token，在请求拦截器的设置请求头中设置。若token存在，将token添加到请求头中，校验通过，返回正常数据，不通过就返回错误码，由前台在响应拦截器中去处理错误
+
+  token是什么时候产生的：在第一次登录时产生
+
+### 在首页发送获取分类列表和商家列表请求时，会报错，401 ---表示权限不够，后台要求携带token验证
+  在响应拦截器里面处理错误：如果响应状态码是401，并且当前不在登录页面，则自动跳转到login页面 
+    $router只在路由组件中，想要用router，直接引入router的文件夹即可：import './src/router'
+    if(error.response.status === 401){  401表示发送的请求需要有通过 HTTP 认证的认证信息，即需要携带token
+      if(router.currentRoute.path !== '/login'){
+        router.replace('/login)
+        Toast('登录失效，请重新登录')  mintui的样式
+      }
+      
+    }else {  // 其他错误
+      提示其他信息
+      MeaasgeBox('提示','')
+    }
+  在获取分类列表和商家列表发请求的方法中，给请求头添加一个属性
+    {
+      headers：{
+        needCheck：true   表示当前接口需要校验
+      }
+    }
+  在请求头中设置时，要对当前接口的needCheck的值进行判断，若为真，但又没有token，则返回一个错误状态的promise
+### 10.6.4 退出登录
+  在响应拦截器中的错误处理回调中：如果响应状态码是401，并且当前不在登录页面，则退出登录（清除数据并跳到登录页面）
+  退出登录 即 
+
+# 11 评分组件
+  1、星星在首页和点击进去的商家详情页显示的大小不一样，所以传过去的除了评分之外还有星星大小
+
+# 12 个人中心的退出登录按钮
+  1 在登录的时候才显示
+  2 点击后，会弹出提示框-是否退出登录，MessageBox.congirm('确认退出吗'),返回promise对象
+    点击确定：清空状态，并清除localStorage的token
+    点击取消：
+
+# 13 商家详情页面
+  是一个新的路由组件--创建 --注册路由
+  给每一个商家列表中的商家绑定点击事件---
+  该路由组件也要拆分 --- 上中下结构 --
+    上面是固定的
+    中间是控制二级路由的，二级路由也要在注册
+    下面是显示二级路由的内容的
+  想要点击时为replace跳转，将点击的标签属性值设置为replace即可
+
+
+# 14 vue项目国际化 
+  国际化：就是把所有用于界面显示的字符串全部提取出来，做成多个语言版本，
+  本地化：给项目做一个本地语言的版本
+  借助vue-i18n
+    用于vue脚手架3版本的项目
+    下载：vue add i18n 执行后会多许多文件，其中包括locales文件夹，并且多了很多语法：
+      $i18n 可以   
+      $t 是一个函数，读取当前指定语言版本（locales文件夹中的版本）的信息值
+    引入：
+# 测试登录与注册：
+  1、密码登录，登录成功跳到个人中心页
+  2、切换到首页，要发请求获取商品和商家列表
+  3、获取商品和商家列表时需要携带token
+  4、若没有token或者token失效，则会退出登录（清空信息，并跳转到登录页面）
+  5、若token失效，且当前不在登录页面，则跳到登录
+  6、若是响应码是404，则提示访问的资源不存在
+  注：在响应拦截器处理错误时，有没有发送请求是通过error里的response判断
+    若是有response，查看response的status，若status是401，则表示token过期，
 
 
 
@@ -254,3 +396,4 @@
 
 # 问题：怎么区分一个库是生产依赖还是开发依赖？
 # async和await
+

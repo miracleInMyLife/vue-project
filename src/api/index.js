@@ -12,16 +12,23 @@ export const reqCategorys = () => axios.get('/index_category')
 export const reqShops = (longitude,latitude) => axios.get('/shops',{params :{latitude,longitude}})
 
 // 发送短信验证码
-export const reqSmsCode = (phoneNumber) => axios.get('/sendcode',{params:{phoneNumber}})
+// export const reqSmsCode = (phone) => axios.get('/sendcode',{params:{phone}})
+// get请求的对象写法
+export const reqSmsCode = (phone) => axios({
+  url:'/sendcode',
+  params:{
+    phone
+  }
+})
 
 // 获取图片验证码
 export const reqImgCode = () => axios.get('/captcha')
 
 // 短信登录
-export const reqSmsLogin = (phone,code) => axios.post(`/login_sms/${phone}${code}`)
+export const reqSmsLogin = (phone,code) => axios.post('/login_sms',{phone,code})
 
 // 密码登录
-export const reqPwdLogin = (name,pwd,captcha ) => axios.post(`/login_pwd/${name}${pwd}${captcha}`)
+export const reqPwdLogin = (name,pwd,captcha) => axios.post('/login_pwd',{name,pwd,captcha})
 
 // 自动登录
 export const reqAutoLogin = () => axios.get('/auto_login')
