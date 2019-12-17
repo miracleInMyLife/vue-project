@@ -216,8 +216,14 @@
 # 9 首页在请求时，显示loading效果
   利用mint-ui  ---- 查看文档
     下载 npm i mint-ui
-    下载 babel-
-    配置
+    下载 babel-plugin-component
+    配置babel.config.js :
+      "plugins": [["component", 
+        {
+          "libraryName": "mint-ui",
+          "style": true
+        }
+      ]]
   在请求拦截器中做loading显示和隐藏
     Indicator.on()
     Indicator.close()
@@ -246,6 +252,7 @@
 ## 表单验证 --- 借用vee-validate,返回的是promise对象
   下载 npm i vee-validate
   引入 import VeeValidate from 'vee-validate'
+  将该功能抽离成单独的模块，在入口文件中引入
 
 ## 10.6 前后台交互
 ### 10.6.1 一次性图形验证码
@@ -258,10 +265,10 @@
   
   当点击图片时，要切换图片
     要切换就要重新指定新的src的值
-    用ref标记输入框,修改src值
-    this.$refs.src = `http://localhost:4000/captcha?t=${Date.now()}`
+    用ref标记输入框ref="imgCode",修改src值
+    this.$refs.imgCode.src = `http://localhost:4000/captcha?t=${Date.now()}`
     后面加query参数t是为了使src的值时刻都是新的，浏览器会发生请求
-    中午待解决：用防抖解决点击过快的问题，让500ms只可以点击一次,用定时器，每次在500ms内点击，都会取消上一次的定时器
+    用防抖解决点击过快的问题，让500ms只可以点击一次,用定时器，每次在500ms内点击，都会取消上一次的定时器
 
 ### 10.6.2 获取短信验证码（测试）
   用到容联云通讯---注册账号---添加测试号码---要将服务器后台的util里的信息改成自己的信息后---重新运行服务器---向测试号码发送验证码---
@@ -307,9 +314,9 @@
 ### 10.6.4 自动登录
   通过请求拦截器设置请求头，携带token数据
     import './src/store'
-    const token = store.state().token
+    const token = store.state.token
     if(token){
-      config.headers['Autonozation']= token
+      config.headers['Authorization']= token
     }
   实现自动登录：在App组件挂载后就要发请求登录---在没有user，有token的情况下才发自动登录的请求
     if(state.token && !state.user._id){
@@ -348,10 +355,11 @@
   在请求头中设置时，要对当前接口的needCheck的值进行判断，若为真，但又没有token，则返回一个错误状态的promise
 ### 10.6.4 退出登录
   在响应拦截器中的错误处理回调中：如果响应状态码是401，并且当前不在登录页面，则退出登录（清除数据并跳到登录页面）
-  退出登录 即 
+  退出登录 即将vuex中的token和user信息清除，并将本地的token也情空
 
 # 11 评分组件
-  1、星星在首页和点击进去的商家详情页显示的大小不一样，所以传过去的除了评分之外还有星星大小
+  1、星星在首页和点击进去的商家详情页显示的大小不一样，所以父组件传过去的除了评分rate之外还有星星大小size
+  2、用数组去装星星不同样式的类名，因为数组是有序的数据集合。我们根据数组去遍历生成标签
 
 # 12 个人中心的退出登录按钮
   1 在登录的时候才显示
@@ -386,7 +394,7 @@
   5、若token失效，且当前不在登录页面，则跳到登录
   6、若是响应码是404，则提示访问的资源不存在
   注：在响应拦截器处理错误时，有没有发送请求是通过error里的response判断
-    若是有response，查看response的status，若status是401，则表示token过期，
+    若是有response，查看response的status，若status是401，则表示token过期，若是404，则表示请求资源未找到
 
 
 

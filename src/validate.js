@@ -33,7 +33,7 @@ VeeValidate.Validator.extend('smsCode', {
 // 指定用户名的验证规则
 VeeValidate.Validator.extend('username', {
   validate: value => {
-    return /^1\d{10}$/.test(value)
+    return /^\w{3,12}$/.test(value)
   },
   getMessage: field => field + '不合法'
 })

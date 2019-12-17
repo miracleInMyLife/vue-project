@@ -7,7 +7,9 @@ const postcss = px2rem({
 
 module.exports = {
   runtimeCompiler : true,
-  lintOnSave: false, // 关闭EsLint的规则
+
+  // 关闭EsLint的规则
+  lintOnSave: false,
 
   //配置css，当设备变化时可以动态的重计算rem的值
   css: { // 添加postcss配置
@@ -43,6 +45,15 @@ module.exports = {
         },
         changeOrigin: true, // 支持跨域, 如果协议/主机也不相同, 必须加上
       },
+    }
+  },
+
+  pluginOptions: {
+    i18n: {
+      locale: 'zh_cn',
+      fallbackLocale: 'zh_cn',
+      localeDir: 'locales',
+      enableInSFC: false
     }
   }
 }

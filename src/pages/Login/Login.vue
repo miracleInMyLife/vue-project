@@ -14,7 +14,7 @@
             <section class="login_message">
               <input type="tel" v-model="phone" maxlength="11" placeholder="手机号" name="smsMobile" v-validate="'required|mobile'">
               <span style="color: red;" v-show="errors.has('smsMobile')">{{ errors.first('smsMobile') }}</span>
-              <button :disabled="phone.length !== 11" :class="phone.length === 11 ? 'get_verification get_code':'get_verification'" @click.prevent="getCode"> {{countDown > 0 ? `验证码已发送(${countDown}s)` : '发送验证码'}}</button>
+              <button :disabled="phone.length !== 11 || this.countDown > 0" :class="phone.length === 11 ? 'get_verification get_code':'get_verification'" @click.prevent="getCode"> {{countDown > 0 ? `验证码已发送(${countDown}s)` : '发送验证码'}}</button>
             </section>
             <section class="login_verification">
               <input type="tel"  v-model="smsCode" maxlength="8" placeholder="验证码" name="smsCode"  v-validate="'required|smsCode'">
@@ -28,7 +28,7 @@
           <div :class="{on:!isShowSms}">
             <section>
               <section class="login_message">
-                <input type="tel" v-model="pwdPhone" maxlength="11" placeholder="用户名" name="username" v-validate="'required|username'">
+                <input type="tel" v-model="username" maxlength="11" placeholder="用户名" name="username" v-validate="'required|username'">
                 <span style="color: red;" v-show="errors.has('username')">{{ errors.first('username') }}</span>
               </section>
               <section class="login_verification">
@@ -62,7 +62,8 @@
 // import Vue from 'vue'
 // import VeeValidate from 'vee-validate'  //处理表单验证的问题
 // import zh_CN from 'vee-validate/dist/locale/zh_CN' // 提示信息本地化
-import { reqSmsCode,reqImgCode,reqSmsLogin,reqPwdLogin } from '../../api/index.js'
+import { reqSmsCode,reqSmsLogin,reqPwdLogin } from '../../api/index.js'
+import { MessageBox,Toast } from 'mint-ui'
 // Vue.use(VeeValidate)
 
 // 指定手机号的验证规则
@@ -127,7 +128,7 @@ export default {
     return {
       phone:'', // 短信登录界面的手机号输入框的数据绑定
       smsCode:'',
-      pwdPhone:'',
+      username:'',
       pwd:'',
       pwdCode:'',
       isShowSms:true, //短信登录和密码登录切换
@@ -138,7 +139,7 @@ export default {
   },
   methods: {
     async getCode(){
-      // 点击获取验证码 就表示要开始倒计时
+      // 点击获取验证码，开始倒计时
       this.countDown = 10
       this.timer = setInterval(() => {
         this.countDown--
@@ -151,10 +152,14 @@ export default {
       const result = await reqSmsCode(this.phone)
       if (result.code === 0) {   // 发送成功
         //提示成功
+        Toast('发送验证码成功，请注意查收')
       }else {
         //提示失败
+        MessageBox('提示','信息发送失败')
+        this.countDown = 0
+
       }
-      console.log(result)
+      // console.log(result)
       // 此处执行获取到验证码之后的操作
 
     },
@@ -162,8 +167,10 @@ export default {
     async codeUpdate(){
       // 无需发请求了，直接修改src值即可
       // const result = await reqImgCode()
-      if (this.id) {
-        clearTimeout(this.id)
+
+      // 做防抖，避免连续点击，
+      if (this.id) { 
+        clearTimeout(this.id)  // 一定要清理定时器，否则会越开越多，影响性能
       }
       this.id = setTimeout(() => {
         this.$refs.imgCode.src = `/api/captcha?t=${Date.now()}`
@@ -171,23 +178,48 @@ export default {
     
     },
     async login(){
-      if (this.isShowSms) {
-        const success = await this.$validator.validateAll(['smsMobile','smsCode'])  // success结果是布尔值
+      if (this.isShowSms) { // 用短信登录
+        const success = await this.$validator.validateAll(['smsMobile','smsCode'])  // success结果是布尔值,表示表单数据校验成功
         if (success) {
-           //若是校验成功，则登录到首页
-           //则发请求 短信登录
-          // const result = await reqSmsLogin(this.phone,this.smsCode)
-          // console.log(result)
-          this.$router.push('/msite')
+           //若是表单数据校验成功，则发请求登录
+          const result = await reqSmsLogin(this.phone,this.smsCode)
+          console.log(result)
+          if (result.code === 0 ) {  // 表示请求登录成功
+            const user = result.data  // user是登录成功后返回的用户信息，包含_id,phone,token
+            const {token} = user
+            // 将token存入本地和vuex中
+            this.$store.dispatch('saveToken',token)
+            localStorage.setItem('token_value',token)
+            // 将user存入vuex中,token已经在上面存了，所以可以删除token
+            delete user.token 
+            this.$store.dispatch('saveUser',user)
+            // 存好之后跳转到profile
+            this.$router.push('/profile')
+          }else {
+            MessageBox('提示',result.msg)
+          }
         }
-      }else {
+      }else {   // 用密码登录
         const success = await this.$validator.validateAll(['username','pwdCode','pwd']) 
         if (success) {
           //若是校验成功，则登录到首页(后面还要校验数据库的信息，此时就先这样写)
-          //则发请求 短信登录
-          // const result = await reqPwdLogin(this.username,this.pwd,this.pwdCode)
-          // console.log(result)
-          // this.$router.push('/profile')
+          //则发请求 密码登录
+          const result = await reqPwdLogin(this.username,this.pwd,this.pwdCode)
+          if (result.code === 0 ) {  // 登录成功后操作与手机验证码登录一样
+            const user = result.data  // user是登录成功后返回的用户信息，包含_id,phone,token
+            const {token} = user
+            // 将token存入本地和vuex中
+            this.$store.dispatch('saveToken',token)
+            localStorage.setItem('token_value',token)
+            // 将user存入vuex中,token已经在上面存了，所以可以删除token
+            delete user.token 
+            this.$store.dispatch('saveUser',user)
+            // 存好之后跳转到profile
+            this.$router.push('/profile')
+          }else{  // 登录失败
+            this.codeUpdate()
+            MessageBox('提示',result.msg)
+          }
         }
       }
     },

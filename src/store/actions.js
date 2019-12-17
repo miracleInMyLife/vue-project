@@ -1,5 +1,5 @@
-import {reqAddress,reqCategorys,reqShops} from '../api/index'
-import {ADDRESS,CATEGORYS,SHOPS} from './mutation-types'
+import {reqAddress,reqCategorys,reqShops,reqAutoLogin} from '../api/index'
+import {ADDRESS,CATEGORYS,SHOPS,SAVE_TOKEN, SAVE_USER,AUTO_LOGIN,LOG_OUT} from './mutation-types'
 
 export default {
   // 根据经纬度请求地址
@@ -59,5 +59,31 @@ export default {
       commit(SHOPS,data)
     }
   },
+
+  // 保存token
+  saveToken({commit},token){
+    commit(SAVE_TOKEN,token)
+  },
+  // 保存user
+  saveUser({commit},user){
+    commit(SAVE_USER,user)
+  },
+  // 自动登录
+  async autoLogin({commit,state}){
+    // 只有在没有user只有token的情况下才自动登录
+    if (!state.user._id && state.token) {
+      // 执行自动登录的请求
+      const result = await reqAutoLogin()
+      if (result.code === 0 ) {
+        console.log(result)
+        const user = result.data
+        commit(AUTO_LOGIN,user)
+      }
+    }
+  },
+  logout({commit}){
+    localStorage.removeItem('token_value')
+    commit(LOG_OUT)
+  }
 
 }

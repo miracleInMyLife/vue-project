@@ -6,10 +6,20 @@ export const reqAddress = (longitude,latitude) => axios.get(`position/${latitude
 // export const reqAddress = (longitude,latitude) => axios.get(`http://localhost:8080/api/position/${latitude},${longitude}`)
 
 //获取食品分类列表
-export const reqCategorys = () => axios.get('/index_category')
+export const reqCategorys = () => axios.get('/index_category',{
+  headers: {
+    needCheck: true  
+  }
+})
 
 // 根据经纬度获取商铺列表
-export const reqShops = (longitude,latitude) => axios.get('/shops',{params :{latitude,longitude}})
+export const reqShops = (longitude,latitude) => axios.get('/shops',{
+  params :{
+    latitude,longitude
+  },
+  headers: {
+    needCheck: true
+}})
 
 // 发送短信验证码
 // export const reqSmsCode = (phone) => axios.get('/sendcode',{params:{phone}})

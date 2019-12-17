@@ -1,8 +1,8 @@
 <template>
-  <div class="star star-24">
-    <span class="star-item on" v-for="(wholeStar,index) in wholeStars" :key="index"></span>
-    <span class="star-item half" v-if ="halfStars"></span>
-    <span class="star-item off" v-for="(emptyStar,index) in emptyStars" :key="index"></span>
+  <div class="star"  :class="`star-${size}`">
+    <span class="star-item" v-for="(star,index) in stars" :key="index" :class="star"></span>
+    <!-- <span class="star-item half" v-if ="halfStars"></span>
+    <span class="star-item off" v-for="(emptyStar,index) in emptyStars" :key="index"></span> -->
   </div>
 </template>
 
@@ -10,31 +10,49 @@
 <script>
 
 export default {
-  props:['rate'], // 在使用组件时根据父组件传来的评分，计算出数值，根据传来的星星大小，对应相应的样式类名显示
+  props:['rate','size'], // 在使用组件时根据父组件传来的评分，计算出数值，根据传来的星星大小，对应相应的样式类名显示
   computed: {
-    wholeStars(){
-      return parseInt(this.rate)  // 取整数
-    },
-    halfStars(){
-      if(this.rate - parseInt(this.rate) >= 0.5) {  
-        return true
-      }else {
-        return false
+    // wholeStars(){
+    //   return parseInt(this.rate)  // 取整数
+    // },
+    // halfStars(){
+    //   if(this.rate - parseInt(this.rate) >= 0.5) {  
+    //     return true
+    //   }else {
+    //     return false
+    //   }
+    // },
+    // emptyStars(){
+    //   if ( parseInt(this.rate) + this.halfStars < 5) {  
+    //     // console.log(this.rate)
+    //     return (5 - this.halfStars -parseInt(this.rate))
+    //   }else if ( parseInt(this.rate) + this.halfStars >= 5) {
+    //     return '1'
+    //   }
+    // },
+    stars(){
+      let arr =[]
+      let fullStars = parseInt(this.rate)
+      for (let index = 0; index<fullStars; index++) {
+        arr.push('on')
       }
-    },
-    emptyStars(){
-      if ( parseInt(this.rate) + this.halfStars < 5) {  
-        console.log(this.rate)
-        return (5 - this.halfStars -parseInt(this.rate))
-      }else if ( parseInt(this.rate) + this.halfStars >= 5) {
-        return 0
+      let halfStars = 0
+      if (this.rate*10 - fullStars*10 >= 5 ) {
+        halfStars = 1
+        arr.push('half')
       }
+      while (arr.length < 5) {
+        arr.push('off')
+      }
+      // console.log(arr)
+      return arr
     }
   },
 }
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus"d>
+<style lang="stylus" rel="stylesheet/stylus">
+@import '../../common/stylus/mixins.styl'
 .star //2x图 3x图
   float left
   font-size 0

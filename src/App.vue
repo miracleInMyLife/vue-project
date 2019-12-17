@@ -12,16 +12,23 @@ import FooterNav from './components/footer/FooterNav.vue'
 import Header from './components/header/Header.vue' // 注册全局组件
 import Score from './components/score/Score' // 注册全局组件
 
+import {reqAutoLogin} from './api/index'
+
 // 注册全局的组件，因为header组件在四个页面中都用到了
 Vue.component('Header',Header)
 Vue.component('Score',Score)
 
-
 export default {
+
   name: 'app',
   components: {
     FooterNav
-  }
+  },
+  mounted() {
+    //组件一挂载，就要发送自动登录的请求  
+    //将发送请求的动作放到action中，因为发完请求后需要保存user的信息到vuex中
+    this.$store.dispatch('autoLogin')
+  },
 }
 </script>
 

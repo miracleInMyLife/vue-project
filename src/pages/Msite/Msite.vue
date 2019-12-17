@@ -37,7 +37,7 @@
       </div>
       <div class="shop_container">
         <ul class="shop_list" v-if="shops.length>0">
-          <li class="shop_li border-1px" v-for="(shop,index) in shops" :key="index">
+          <li class="shop_li border-1px" v-for="(shop,index) in shops" :key="index" @click="shopInfo">
             <a>
               <div class="shop_left">
                 <img class="shop_img" :src="'https://fuss10.elemecdn.com' + shop.image_path">
@@ -58,7 +58,7 @@
                       <span class="star-item half"></span>
                       <span class="star-item off"></span> -->
                       <!-- 将对应的评分传给score -->
-                    <Score :rate="shop.rating" :size="'24'"/>
+                    <Score :rate="shop.rating" :size="24"/>
                     <!-- </div> -->
                     <div class="rating_section">
                       {{shop.rating}}
@@ -115,6 +115,11 @@ export default {
     categorysArr(){
       return chunk(this.categorys,8)
     },
+  },
+  methods: {
+    shopInfo(){
+      this.$router.replace('/shop')
+    }
   },
   async mounted() {
     this.$store.dispatch('getAddress')
