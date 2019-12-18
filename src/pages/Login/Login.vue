@@ -47,13 +47,14 @@
               </section>
             </section>
           </div>
-          <button class="login_submit" @click.prevent="login">登录</button>
+          <button class="login_submit" @click.prevent="login">{{$t('login_login')}}</button>
         </form>
-        <a href="javascript:;" class="about_us">关于我们</a>
+        <a href="javascript:;" class="about_us">{{$t('login_aboutUs')}}</a>
       </div>
-      <a href="javascript:" class="go_back" @click="$router.back()">
+      <a href="javascript:" class="go_back" @click="$router.replace('/profile')">
         <i class="iconfont icon-jiantou"></i>
       </a>
+      <Button type="primary" @click="toggleLang">切换语言</Button>
     </div>
   </section>
 </template>
@@ -63,7 +64,7 @@
 // import VeeValidate from 'vee-validate'  //处理表单验证的问题
 // import zh_CN from 'vee-validate/dist/locale/zh_CN' // 提示信息本地化
 import { reqSmsCode,reqSmsLogin,reqPwdLogin } from '../../api/index.js'
-import { MessageBox,Toast } from 'mint-ui'
+import { MessageBox,Toast,Button } from 'mint-ui'
 // Vue.use(VeeValidate)
 
 // 指定手机号的验证规则
@@ -224,6 +225,14 @@ export default {
       }
     },
     
+    toggleLang(){
+      //获取当前语言并设置新的语言
+      console.log(this.$i18n)
+      this.$i18n.locale = this.$i18n.locale === 'en' ? 'zh_cn':'en'
+
+      // 将最近一次切换的语言存到本地中去 --- 确保刷新时依然是上一次切换的语言
+      localStorage.setItem('locale_key',this.$i18n.locale)
+    }
   },
   // watch: {
   //   countDown(value){

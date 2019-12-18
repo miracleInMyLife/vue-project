@@ -4,25 +4,25 @@
       <span>
         <i class="iconfont icon-shouye"></i>
       </span>
-      <span>首页</span>
+      <span>{{$t('footer_home')}}</span>
     </span>
     <span class="nav-item" :class="{on : $route.path === '/search'}" @click="change('/search')">
       <span>
         <i class="iconfont icon-sousuo"></i>
       </span>
-      <span>搜索</span>
+      <span>{{$t('footer_search')}}</span>
     </span>
-    <span class="nav-item" :class="{on : $route.path === '/order'}" @click="change('order')">
+    <span class="nav-item" :class="{on : $route.path === '/order'}" @click="change('/order')">
       <span>
         <i class="iconfont icon-dingdan"></i>
       </span>
-      <span>订单</span>
+      <span>{{$t('footer_order')}}</span>
     </span>
-    <span class="nav-item" :class="{on : $route.path === '/profile'}" @click="change('profile')">
+    <span class="nav-item" :class="{on : $route.path === '/profile'}" @click="change('/profile')">
       <span>
         <i class="iconfont icon-yonghudianji"></i>
       </span>
-      <span>我的</span>
+      <span>{{$t('footer_profile')}}</span>
     </span>
   </div>
 </template>

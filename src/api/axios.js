@@ -20,7 +20,8 @@ instance.interceptors.request.use(config => {
     }
 
     // 从vuex中取出token
-    const token = store.state.token
+    const token = store.state.user.token
+    console.log(token)
     if (token) {
       // 若是token存在，则在请求头中加上一个属性Authorization
       config.headers['Authorization'] = token

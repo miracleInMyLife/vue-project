@@ -42,3 +42,12 @@ export const reqPwdLogin = (name,pwd,captcha) => axios.post('/login_pwd',{name,p
 
 // 自动登录
 export const reqAutoLogin = () => axios.get('/auto_login')
+
+// 获取shop里的goods
+export const reqGoods = () => axios.get('/goods')
+
+// 获取shop里的Ratings
+export const reqRatings = () => axios.get('/ratings')
+
+// 获取shop里的info
+export const reqInfo = () => axios.get('/info')

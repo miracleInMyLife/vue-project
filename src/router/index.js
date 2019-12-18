@@ -8,7 +8,7 @@ import Profile from '../pages/Profile/Profile.vue'
 import Login from '../pages/Login/Login.vue'
 import Shop from '../pages/Shop/Shop.vue'
 import Goods from '../pages/Shop/shopInfo/Goods.vue'
-import Judge from '../pages/Shop/shopInfo/Judge.vue'
+import Ratings from '../pages/Shop/shopInfo/Ratings.vue'
 import Info from '../pages/Shop/shopInfo/Info.vue'
 
 
@@ -60,15 +60,15 @@ export default new VueRouter({
           component: Goods,
         },
         {
-          path: '/shop/judge',
-          component: Judge,
+          path: '/shop/ratings',
+          component: Ratings,
         },
         {
           path: '/shop/info',
           component: Info,
         },
         {
-          path: '',
+          path: '/shop',
           redirect: '/shop/goods'
         },
       ]

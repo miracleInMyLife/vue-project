@@ -6,11 +6,19 @@ import state from './state.js'
 import mutations from './mutations.js'
 import actions from './actions.js'
 import getters from './getters.js'
+import msite from './modules/msite'
+import user from './modules/user'
+import shop from './modules/shop'
 
 Vue.use(Vuex)
 export default new Vuex.Store({
   state,
   mutations,
   actions,
-  getters
+  getters,
+  modules:{
+    msite,
+    user,
+    shop
+  }
 })

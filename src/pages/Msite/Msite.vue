@@ -104,13 +104,18 @@
 <script>
 import Swiper from 'swiper'
 import 'swiper/css/swiper.css'  //引入样式，轮播类名才能起作用
+
 import { mapState } from 'vuex'
 import chunk from 'lodash/chunk' // chunk函数将一个一维数组变为二维数组，只引入chunk，是按需打包
 
 export default {
   computed: {
-    ...mapState(['address','categorys','shops']),
-
+    ...mapState(
+      {address: state => state.msite.address,
+      categorys: state => state.msite.categorys,
+      shops: state => state.msite.shops
+      },
+    ),
     // 加工一维数组，生成二维数组
     categorysArr(){
       return chunk(this.categorys,8)

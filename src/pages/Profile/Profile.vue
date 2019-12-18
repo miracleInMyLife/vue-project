@@ -89,7 +89,9 @@
         </div>
       </a>
     </section>
-    <Button type="danger" @click="log_out" v-show="user._id">退出登录</Button>
+    <section class="profile_my_order border-1px" v-show="user._id">
+      <mt-button style="width: 100%" type="danger" @click="logout">退出登陆</mt-button>
+    </section>
   </section>
 </template>
 
@@ -100,13 +102,15 @@ import { Button,MessageBox } from 'mint-ui'
 export default {
   
   computed: {
-    ...mapState(['user'])
+    ...mapState({
+      user: state => state.user.user
+    })
   },
   methods: {
-    log_out(){
+    logout(){
       MessageBox.confirm('确定退出登录吗？').then(()=>{
         this.$store.dispatch('logout')
-        this.$router.replace('/login')
+        // this.$router.replace('/login')
       })
     }
   }
