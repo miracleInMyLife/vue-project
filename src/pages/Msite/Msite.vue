@@ -2,7 +2,7 @@
   <section class="msite">
     <!--首页头部-->
     <Header :title="address.name || '正在定位中...'">
-      <span class="header_search" slot="left">
+      <span class="header_search" slot="left" @click="$router.push('/search')">
         <i class="iconfont icon-sousuo"></i>
       </span>
       <span class="header_login" slot="right" @click="$router.replace('/login')">
@@ -183,7 +183,7 @@ export default {
 }
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus">
+<style lang="stylus" rel="stylesheet/stylus" scoped>
 @import '../../common/stylus/mixins.styl'
 .msite  //首页
   width 100%

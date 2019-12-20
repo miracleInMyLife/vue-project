@@ -51,3 +51,13 @@ export const reqRatings = () => axios.get('/ratings')
 
 // 获取shop里的info
 export const reqInfo = () => axios.get('/info')
+
+
+// 根据经纬度和关键字搜索商家
+export const reqSearchShops = (latitude,longitude,keyword) => axios.get('/search_shops', {
+  params:{
+    keyword,
+    geohash:`${latitude},${longitude}`,
+    
+  }
+})

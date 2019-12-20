@@ -39,6 +39,8 @@
         </li>
       </ul>
     </div>
+    <!-- 购物车组件 -->
+    <ShopCar />
   </div>
   <!-- 将目标food传给Food组件，但此时拿不到food，需要在上面遍历生成时，点击将food存入data中-->
   <!-- 该组件只在，点击对应食物时，才会显示 -->
@@ -53,19 +55,21 @@
 import { mapState } from 'vuex'
 import BScroll from 'better-scroll'
 import Food from '@/components/food/Food'
+import ShopCar from '@/components/shopcar/ShopCar.vue'
 
 export default {
 
   data() {
     return {
-      tops:[],
-      scrollY:'',
+      tops:[],  // 保存右侧li的top值的数组
+      scrollY:'',  // 实时值，在右侧滑动过程中不断变化的值
       index:'',
-      food:{}
+      food:{}   // 只有将food存到状态中，才可以传给Food组件
     }
   },
   components:{
-    Food
+    Food,
+    ShopCar
   },
   computed: {
     ...mapState({
@@ -74,10 +78,10 @@ export default {
     currentIndex(){
       const index= this.tops.findIndex((top,index)=> this.scrollY >= top  && this.scrollY < this.tops[index+1])
       // 使滑动右侧列表时，左侧的菜单始终可见
-      if (this.index !== index && this.scrollLeft) {
-        this.index = index
-        const li = this.$refs.leftLis.children[index]
-        this.scrollLeft.scrollToElement(li,500)
+      if (this.index !== index && this.scrollLeft) { // 若是在右侧同一个li的范围中滑懂，则左侧对应的也不变
+        this.index = index   // 保存当前右侧滑动的index保存到状态中
+        const li = this.$refs.leftLis.children[index]  // 根据计算出来的index取出对应的li标签
+        this.scrollLeft.scrollToElement(li,500)  // 左边的滑到指定的li处
       }
       
       return index
@@ -131,6 +135,7 @@ export default {
     // 将food存入状态中，由状态传给Food组件，并调用Food组件的方法
     toggleShow(food){
       this.food = food
+      // this.$refs.food取得是Food的组件对象，所以可以调用Food组件的toggleShow方法
       this.$refs.food.toggleShow()
     }
   },

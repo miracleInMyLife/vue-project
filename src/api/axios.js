@@ -14,14 +14,14 @@ const instance = axios.create({
 instance.interceptors.request.use(config => {
     Indicator.open() // 开启loading效果
 
-    console.log(config) // config里面是所有请求的信息：方式、参数、地址等等
+    // console.log(config) // config里面是所有请求的信息：方式、参数、地址等等
     if (config.data instanceof Object) {
       config.data = qs.stringify(config.data)
     }
 
     // 从vuex中取出token
     const token = store.state.user.token
-    console.log(token)
+    // console.log(token)
     if (token) {
       // 若是token存在，则在请求头中加上一个属性Authorization
       config.headers['Authorization'] = token

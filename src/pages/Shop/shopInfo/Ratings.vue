@@ -10,12 +10,12 @@
         <div class="overview-right">
           <div class="score-wrapper">
             <span class="title">服务态度</span>
-            <div>Star组件</div>
+            <Score rate="4.4" size="36"/>
             <span class="score">4.4</span>
           </div>
           <div class="score-wrapper">
             <span class="title">商品评分</span>
-            <div>Star组件</div>
+            <Score rate="4.4" size="36"/>
             <span class="score">4.6</span></div>
           <div class="delivery-wrapper">
             <span class="title">送达时间</span>
@@ -26,9 +26,9 @@
 
       <div class="split"></div>
 
-      <div>RatingSelect组件</div>
+      <RatingSelect />
 
-      <div class="rating-wrapper">
+      <div class="rating-wrapper" ref="scrollRatings">
         <ul>
           <li class="rating-item" v-for="(rate,index) in ratings" :key="index">
             <div class="avatar">
@@ -37,12 +37,12 @@
             <div class="content">
               <h1 class="name">{{rate.username}}</h1>
               <div class="star-wrapper">
-                <div>Star组件</div>
-                <span class="delivery">{{rate.deliveryTime}}</span>
+                <Score :rate="rate.score" size="24"/>
+                <span class="delivery">配送时间：{{rate.deliveryTime}}分钟</span>
               </div>
               <p class="text">{{rate.text}}</p>
               <div class="recommend">
-                <span class="iconfont icon-thumb_up"></span>
+                <span class="iconfont icon-thumbsup"></span>
               </div>
               <div class="time">{{rate.rateTime}}</div>
             </div>
@@ -55,11 +55,30 @@
 
 <script>
 import {mapState} from 'vuex'
+import BScroll from 'better-scroll'
+import RatingSelect from '@components/ratingSelect/RatingSelect'
+
 export default {
+  components:{
+    RatingSelect
+  },
   computed: {
     ...mapState({
       ratings: state => state.shop.ratings
     })
+  },
+  watch: {
+    ratings(){
+      this.$nextTick(()=>{
+        if (!this.scroll) {
+          this.scroll = new BScroll(this.$refs.scrollRatings,{
+            click:true
+          })
+        }else {
+          this.scroll.refresh()
+        }
+      })
+    }
   },
 }
 </script>
@@ -172,6 +191,7 @@ export default {
           line-height: 18px
           color: rgb(7, 17, 27)
           font-size: 12px
+          text-align left
         .recommend
           line-height: 16px
           font-size: 0

@@ -13,3 +13,7 @@ export const SHOP_INFO = 'shop_info'
 
 export const FOOD_COUNT = 'food_count'
 export const FOOD_COUNT_REDUCE = 'food_count_reduce'
+
+
+export const CLEAR_SHOPCAR = 'clear_shopcar'
+

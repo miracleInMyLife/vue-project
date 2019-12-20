@@ -1,5 +1,5 @@
 import {ADDRESS,CATEGORYS,SHOPS} from '../mutation-types'
-import {reqAddress,reqCategorys,reqShops} from '../../api/index'
+import {reqAddress,reqCategorys,reqShops,reqSearchShops} from '../../api/index'
 
 export default {
   state:{
@@ -8,6 +8,7 @@ export default {
     address:{},
     categorys:[],
     shops:[],
+    searchShops:[]  // 搜索的商家列表
   },
   actions:{
     async getAddress({commit,state}){
@@ -47,6 +48,13 @@ export default {
         commit(SHOPS,data)
       }
     },
+
+    // 根据经纬度和关键字搜索商家
+    async searchShops({commit,state},keyword){
+      const result = await reqSearchShops(state.latitude,state.longitude,keyword)
+      console.log(result)
+      // commit()
+    }
 
   },
   mutations:{

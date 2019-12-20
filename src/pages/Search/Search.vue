@@ -2,19 +2,28 @@
   <section class="search">
     <Header title="搜 索"></Header>
     <form class="search_form" action="#">
-      <input type="search" name="search" placeholder="请输入商家或美食名称" class="search_input">
-      <input type="submit" name="submit" class="search_submit">
+      <input type="search" name="search" placeholder="请输入商家或美食名称" class="search_input" v-model="keyword">
+      <input type="submit" name="submit" class="search_submit" @click.prevent="searchShops">
     </form>
   </section>
 </template>
 
 <script>
 export default {
-
+  data() {
+    return {
+      keyword:''
+    }
+  },
+  methods: {
+    searchShops(){
+      this.$store.dispatch('searchShops',this.keyword)
+    }
+  },
 }
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus">
+<style lang="stylus" rel="stylesheet/stylus" scoped>
 .search  //搜索
   width 100%
   .header
